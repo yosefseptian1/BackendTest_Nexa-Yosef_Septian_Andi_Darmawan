@@ -1,0 +1,13 @@
+version: "3"
+services:
+  web:
+    image: node:alpine
+    container_name: backend
+    ports:
+      - "3000:3000"
+    environment :
+      - DB_NAME=gmedia_democase
+      - DB_USER=gmedia_democase2
+      - DB_PASSWORD=Janglidalam29J
+      - DB_HOST=gmedia.bz
+    command: npm start
