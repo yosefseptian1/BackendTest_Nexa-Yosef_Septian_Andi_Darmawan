@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import db from "../config/database.js"
 import { QueryTypes } from "sequelize";
 import KaryawanModel from "../model/KaryawanModel.js";
+import LogModel, { ResponseModel } from "../model/LogModel.js"
 
 export const getAdmin = async(req, res) =>{
     try {
@@ -79,7 +80,7 @@ export const InsertKaryawan = async(req, res) => {
             photo,
             tgl_lahir
           } = req.body;
-
+        
         let user = 'select * from admin';
         const cekUser = await db.query(user , {
             type: QueryTypes.SELECT
@@ -93,6 +94,16 @@ export const InsertKaryawan = async(req, res) => {
             type: QueryTypes.SELECT
         })
         if(cekNip.length != 0){
+            await LogModel.create({
+                user_id: cekUser[0].username,
+                api: 'InsertKaryawan',
+                request: JSON.stringify(req.body),
+                response: JSON.stringify({
+                    status: false,
+                    message: 'NIP sudah terdaftar',
+                    data: []
+                })
+            })
             return res.status(400).json({ 
                 message: 'NIP sudah terdaftar',
                 data: []
@@ -112,7 +123,17 @@ export const InsertKaryawan = async(req, res) => {
             transaction
         });
         transaction.commit();
-      return res.status(200).json({
+        await LogModel.create({
+            user_id: 'some_user_id',
+            api: 'InsertKaryawan',
+            request: JSON.stringify(req.body),
+            response: JSON.stringify({
+                status: true,
+                message: 'Insert berhasil'
+            })
+        })
+      
+        return res.status(200).json({
         message: 'Insert successful' 
     });
     } catch (error) {
